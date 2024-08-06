@@ -1,0 +1,136 @@
+#include <iostream>
+#include <stdexcept>
+
+struct Lista {       // Estrutura do nó da lista 
+    int dados;
+    Lista* proximo;
+
+    Lista(int valor) : dados(valor), proximo(nullptr) {}
+};
+
+class manuseioLista {    // Classe da lista encadeada
+private:
+    Lista* inicio;
+    int tamanho;
+
+public:
+    manuseioLista() : inicio(nullptr), tamanho(0) {}
+
+    bool estaVazia() const {      // Faz a verificação se a lista está vazia
+        return inicio == nullptr;
+    }
+
+    int obterTamanho() const {    // Obtêm o tamanho da lista
+        return tamanho;
+    }
+
+    int Obter(int posicao) const {     // Obtêm o valor do elemento em uma posição desejada
+        if (posicao < 1 || posicao > tamanho) {
+            throw std::out_of_range("Posição inserida não é válida!");
+        }
+        Lista* atual = inicio;
+        for (int i = 1; i < posicao; ++i) {
+            atual = atual->proximo;
+        }
+        return atual->dados;
+    }
+
+    void Modificar(int posicao, int valor) {       // Faz a modificação do valor do elemento em uma posição desejada
+        if (posicao < 1 || posicao > tamanho) {
+            throw std::out_of_range("Posição inserida não é válida!");
+        }
+        Lista* atual = inicio;
+        for (int i = 1; i < posicao; ++i) {
+            atual = atual->proximo;
+        }
+        atual->dados = valor;
+    }
+
+    void Inserir(int posicao, int valor) {      // Faz a inserção de um elemento em uma posição desejada 
+        if (posicao < 1 || posicao > tamanho + 1) {
+            throw std::out_of_range("Posição inserida não é válida!");
+        }
+
+        Lista* novaLista = new Lista(valor);
+        if (posicao == 1) {
+            novaLista->proximo = inicio;
+            inicio = novaLista;
+        } else {
+            Lista* atual = inicio;
+            for (int i = 1; i < posicao - 1; ++i) {
+                atual = atual->proximo;
+            }
+            novaLista->proximo = atual->proximo;
+            atual->proximo = novaLista;
+        }
+        ++tamanho;
+    }
+
+    void remover(int posicao) {       // Faz a retirada de um elemento de uma posição desejada
+        if (posicao < 1 || posicao > tamanho) {
+            throw std::out_of_range("Posição inserida não é válida!");
+        }
+
+        Lista* ele;
+        if (posicao == 1) {
+            ele = inicio;
+            inicio = inicio->proximo;
+        } else {
+            Lista* atual = inicio;
+            for (int i = 1; i < posicao - 1; ++i) {
+                atual = atual->proximo;
+            }
+            ele = atual->proximo;
+            atual->proximo = ele->proximo;
+        }
+        delete ele;
+        --tamanho;
+    }
+
+    void Imprimir() const {      // Imprime todos os elementos pertencentes a lista
+        Lista* atual = inicio;
+        while (atual != nullptr) {
+            std::cout << atual->dados << " ";
+            atual = atual->proximo;
+        }
+        std::cout << std::endl;
+    }
+
+    ~manuseioLista() {     // Destrutor com a função de liberar memória alocada
+        while (inicio != nullptr) {
+            Lista* ele = inicio;
+            inicio = inicio->proximo;
+            delete ele;
+        }
+    }
+};
+
+void testeManuseioLista() {      // Função que realiza os testes
+    manuseioLista lista;
+    try {
+        lista.Inserir(1, 27);
+        lista.Inserir(2, 43);
+        lista.Inserir(3, 14);
+        lista.Imprimir(); // Deve imprimir 27 43 14
+
+        lista.Inserir(2, 17);
+        lista.Imprimir(); // Deve imprimir: 27 17 43 14
+
+        lista.remover(3);
+        lista.Imprimir(); // Deve imprimir: 27 17 14
+
+        std::cout << "Tamanho da lista: " << lista.obterTamanho() << std::endl; // Deve imprimir a informação: Tamanho da lista: 3
+        std::cout << "Elemento encontrado na posição 2 da lista: " << lista.Obter(2) << std::endl; // Deve imprimir a informação: Elemento na posição 2 da lista: 17
+
+        lista.Modificar(2, 49);
+        lista.Imprimir(); // Deve imprimir: 27 49 14
+
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Erro encontrado: " << e.what() << std::endl;
+    }
+}
+
+int main() {
+    testeManuseioLista();
+    return 0;
+}
